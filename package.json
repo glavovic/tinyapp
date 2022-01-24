@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/glavovic/tinyapp/issues"
   },
-  "homepage": "https://github.com/glavovic/tinyapp#readme"
+  "homepage": "https://github.com/glavovic/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
 }
