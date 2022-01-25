@@ -3,6 +3,15 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs")
+
+
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com",
+};
+
 // generate unique string length of 6 characters
 const generateRandomString = () => {
   let result = '';
@@ -14,18 +23,13 @@ const generateRandomString = () => {
 };
 
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.set("view engine", "ejs")
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
 
-
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-};
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL};
+  res.render("urls_show", templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -33,24 +37,8 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase)
-});
-
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
-
-app.post("/urls", (req, res) => {
-  id = generateRandomString()
-  urlDatabase[id] = req.body.longURL
-  res.redirect('/urls/'+ id)
-}) 
-
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL};
-  res.render("urls_show", templateVars);
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -58,6 +46,14 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL]
   res.redirect(longURL);
 });
+
+
+
+app.post("/urls", (req, res) => {
+  let id = generateRandomString()
+  urlDatabase[id] = req.body.longURL
+  res.redirect('/urls/'+ id)
+}) 
 
 
 app.listen(PORT, () => {
