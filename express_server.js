@@ -38,22 +38,30 @@ const generateRandomString = () => {
 
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+    const user_id = req.cookies.user_id;
+  const user = users[user_id];
+  const templateVars = { user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const user_id = req.cookies.user_id;
+  const user = users[user_id];
+  const templateVars = { user, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const user_id = req.cookies.user_id;
+  const user = users[user_id];
+  const templateVars = { user, urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  const user_id = req.cookies.user_id;
+  const user = users[user_id];
+  const templateVars = { user, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
@@ -74,7 +82,7 @@ app.post("/u/:shortURL", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -98,13 +106,28 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-
-  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], urls: urlDatabase };
+  
+  const templateVars = { user: null};
   res.render("urls_register", templateVars)
 });
 
 app.post("/register", (req, res) => {
-  
+  console.log(req.body)
+  const email = req.body.email;
+  const password = req.body.password;
+  if ((!password) || (!email)) {
+    return res.status(400).send('email and password cannot be blank')
+  }
+
+  id = generateRandomString()
+  users[id] = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password
+  }
+  console.log(users)
+  res.cookie("user_id", id)
+  res.redirect("/urls")
 });
 
 
