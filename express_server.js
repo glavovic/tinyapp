@@ -13,18 +13,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 // generate unique string length of 6 characters
 const generateRandomString = () => {
@@ -38,7 +38,7 @@ const generateRandomString = () => {
 
 
 app.get("/urls/new", (req, res) => {
-    const user_id = req.cookies.user_id;
+  const user_id = req.cookies.user_id;
   const user = users[user_id];
   const templateVars = { user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_new", templateVars);
@@ -108,26 +108,31 @@ app.post("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   
   const templateVars = { user: null};
-  res.render("urls_register", templateVars)
+  res.render("urls_register", templateVars);
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   const email = req.body.email;
   const password = req.body.password;
   if ((!password) || (!email)) {
-    return res.status(400).send('email and password cannot be blank')
+    return res.status(400).send('email and password cannot be blank');
+  }
+  
+  for (let key in users) {
+    if (email === users[key].email)
+      return res.status(400).send("Email is in use already");
   }
 
-  id = generateRandomString()
+  const id = generateRandomString();
   users[id] = {
     id: id,
     email: req.body.email,
     password: req.body.password
-  }
-  console.log(users)
-  res.cookie("user_id", id)
-  res.redirect("/urls")
+  };
+  console.log(users);
+  res.cookie("user_id", id);
+  res.redirect("/urls");
 });
 
 
