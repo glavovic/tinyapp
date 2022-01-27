@@ -16,14 +16,13 @@
       <form style="display: flex; gap: 10px;
       " action="/logout" method="POST">
         <p style="margin : auto">Logged in as: <%= user.email %></p>
-        <button type="submit" class="btn btn-outline-secondary">Log Out</button>
+        <button type="submit" class="btn btn-primary">Log Out</button>
       </form>
      <% } else { %>
     <form action="/login" method="GET" >
-      <button type="submit" class="btn btn-outline-secondary">Log In</button>
-    </form>
+      <button type="submit" class="btn btn-primary">Log In</button>
     <form action="/register" method="GET" >
-      <button type="submit" class="btn btn-outline-secondary">Register</button>
+      <button type="submit" class="btn btn-primary">Register</button>
     </form>
     <% } %>
   </nav>

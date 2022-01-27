@@ -12,15 +12,12 @@
 <body>
     <%- include('partials/_header') %>
   <main style="margin: 1em;">
-    <h3>Register</h3>
-      <form action="/login" method="POST">
-        <input type="email" name="email">
-        <div>
-        </div>
-        <input type="password" name=password>
-        <div>
-        </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+    <h3>Log In</h3>
+      <form action="/login" method="POST" style="display : flex; flex-direction: column;">
+        <input type="email" name="email" style="margin-bottom: 1em;">
+        <input type="password" name=password style="margin-bottom: 1em;">
+      <button type="submit" class="btn btn-primary" style="
+      margin-top: 1em;"">Submit</button>
     </form>
   </main>
     <!-- Bootstrap JS -->
