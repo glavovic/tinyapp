@@ -19,9 +19,11 @@
         <button type="submit" class="btn btn-outline-secondary">Log Out</button>
       </form>
      <% } else { %>
-    <form action="/login" method="POST" >
-      <input name="username" placeholder="Username"> 
+    <form action="/login" method="GET" >
       <button type="submit" class="btn btn-outline-secondary">Log In</button>
+    </form>
+    <form action="/register" method="GET" >
+      <button type="submit" class="btn btn-outline-secondary">Register</button>
     </form>
     <% } %>
   </nav>

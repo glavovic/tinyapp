@@ -7,6 +7,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
+const verifyEmail = email => {
+  for (let key in users) {
+    let user = users[key];
+    if (user.email === email) {
+      return user;
+    }
+  }
+};
+const verifyPassword = (password, key) => {
+  if (!key) {
+    return false;
+  }
+  return password === key.password;
+};
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -86,6 +101,11 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {user : null};
+  res.render("urls_login", templateVars);
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -93,9 +113,20 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
-  res.redirect("/urls");
+  
+  const password = req.body.password;
+  const email = req.body.email
+  if (!password || !email) {
+    return res.status(403).send('email and password cannot be blank');
+  }
+
+  const user = verifyEmail(req.body.email);
+
+  if (verifyPassword(req.body.password, user)) {
+    res.cookie("user_id", user.id);
+    res.redirect("urls");
+  }
+  return res.status(403).send('Email or password is incorrect')
 });
 
 
@@ -112,16 +143,15 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
   const email = req.body.email;
   const password = req.body.password;
+
   if ((!password) || (!email)) {
-    return res.status(400).send('email and password cannot be blank');
+    return res.status(403).send('email and password cannot be blank');
   }
-  
-  for (let key in users) {
-    if (email === users[key].email)
-      return res.status(400).send("Email is in use already");
+
+  if (verifyEmail(email)) {
+    return res.status(403).send('email is in use');
   }
 
   const id = generateRandomString();
@@ -130,7 +160,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  console.log(users);
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
