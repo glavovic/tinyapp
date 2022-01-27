@@ -78,7 +78,7 @@ app.get("/urls/new", (req, res) => {
   if(!user) {
     res.redirect("/login")
   }
-  const templateVars = { user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render("urls_new", templateVars);
 });
 
@@ -92,11 +92,10 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies.user_id;
   const user = users[user_id];
-  if (user) {
+  if(user) {
     const templateVars = { user, urls: urlsForUser(user, urlDatabase) };
     res.render("urls_index", templateVars);
   }
-  res.clearCookie("user_id")
   res.redirect("/login");
 });
 
@@ -119,13 +118,13 @@ app.post("/u/:shortURL", (req, res) => {
   const user = users[user_id];
     if(user) {
       const shortURL = req.params.shortURL;
-      urlDatabase[shortURL] = {
+        urlDatabase[shortURL] = {
         longURL: req.body.newURL,
         userID: user
       };
       res.redirect("/urls")
     };
-  res.status(403).res.send("have to be loged in to preform that activity")
+    res.statusCode(403).send("have to be loged in to preform that activity")
 });
 
 app.post("/logout", (req, res) => {
@@ -142,7 +141,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     res.redirect("/urls");
   }
-  res.status(403).send("have to be logged in for that activity")
+  res.statusCode(403).send("have to be logged in for that")
 });
 
 app.post("/login", (req, res) => {
@@ -171,7 +170,6 @@ app.post("/urls", (req, res) => {
     res.redirect("/login")
     return res.statusCode(403).redirect("/login")
   }
-  console.log(req.body)
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userID: user
