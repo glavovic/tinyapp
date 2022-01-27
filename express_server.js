@@ -5,9 +5,11 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
 app.set("view engine", "ejs");
 
-const verifyEmail = email => {
+const verifyUserEmail = email => {
   for (let key in users) {
     let user = users[key];
     if (user.email === email) {
@@ -19,7 +21,7 @@ const verifyPassword = (password, key) => {
   if (!key) {
     return false;
   }
-  return password === key.password;
+  return bcrypt.compareSync(password, key.password)
 };
 
 const urlsForUser = (id, database) => {
@@ -78,7 +80,7 @@ app.get("/urls/new", (req, res) => {
   if(!user) {
     res.redirect("/login")
   }
-  const templateVars = { user, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  const templateVars = { user, };
   res.render("urls_new", templateVars);
 });
 
@@ -152,7 +154,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send('email and password cannot be blank');
   }
 
-  const user = verifyEmail(req.body.email);
+  const user = verifyUserEmail(req.body.email);
 
   if (verifyPassword(req.body.password, user)) {
     res.cookie("user_id", user.id);
@@ -170,6 +172,7 @@ app.post("/urls", (req, res) => {
     res.redirect("/login")
     return res.statusCode(403).redirect("/login")
   }
+  
   urlDatabase[id] = {
     longURL: req.body.longURL,
     userID: user
@@ -191,7 +194,7 @@ app.post("/register", (req, res) => {
     return res.status(403).send('email and password cannot be blank');
   }
 
-  if (verifyEmail(email)) {
+  if (verifyUserEmail(email)) {
     return res.status(403).send('email is in use');
   }
 
@@ -199,7 +202,7 @@ app.post("/register", (req, res) => {
   users[id] = {
     id: id,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, salt)
   };
   res.cookie("user_id", id);
   res.redirect("/urls");
