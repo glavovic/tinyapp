@@ -57,9 +57,11 @@ app.get("/", (req, res) => {
   const user_id = req.session['user_id'];
   const user = users[user_id];
   if (!user) {
-    res.redirect("/login");
+   return res.redirect("/login");
+  } else {
+    return res.redirect("/urls");
   }
-  res.redirect("/urls");
+
 });
 
 
