@@ -1,17 +1,18 @@
 const { assert } = require('chai');
-
-const { getUserByEmail, generateRandomString, urlsForUser } = require('../helpers.js');
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
+const { getUserByEmail, generateRandomString, urlsForUser, verifyPassword, verifyUserEmail } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
   "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: bcrypt.hashSync("dishwasher-funk", salt)
   }
 };
 
@@ -22,7 +23,7 @@ const testDatabase = {
 
 describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
-    const user = getUserByEmail("user@example.com", testUsers)
+    const user = getUserByEmail("user@example.com", testUsers);
     const expectedUserID = "userRandomID";
     // Write your assert statement here
     assert.equal(user, expectedUserID);
@@ -53,6 +54,17 @@ describe('getUserByEmail', function() {
     assert.deepEqual(user, expectedOutput);
   });
 
+  it('should return user object who owns the email', function() {
+    const user = verifyUserEmail('user2@example.com', testUsers)
+    const expectedOutput =  testUsers["user2RandomID"]
+    assert.deepEqual(user, expectedOutput)
+  });
+
+  it('should compare the hashed password with the non hashed password and return a boolean', function() {
+    const user = verifyPassword('dishwasher-funk', testUsers['user2RandomID'])
+    const expectedOutput = true;
+    assert.deepEqual(user, expectedOutput)
+  })
 });
 
 
