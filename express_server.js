@@ -80,7 +80,7 @@ app.get("/urls", (req, res) => {
   const user_id = req.session['user_id'];
   const user = users[user_id];
   if (!user) {
-    res.redirect('/login');
+    return res.status(403).send('Please Log in! visit <a href="/login">here</a>')
   }
   // looping through each id in the object looking for unique urls
   const templateVars = { user, urls: urlsForUser(user, urlDatabase) };
@@ -101,10 +101,10 @@ app.get("/urls/new", (req, res) => {
   const user_id = req.session['user_id'];
   const user = users[user_id];
   if (!user) {
-    res.redirect("/login");
+    return res.redirect("/login");
   }
   const templateVars = { user, };
-  res.render("urls_new", templateVars);
+  return res.render("urls_new", templateVars);
 });
 
 
@@ -126,8 +126,15 @@ returns HTML with a relevant error message
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.session['user_id'];
   const user = users[user_id];
-  const templateVars = { user, urls: urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
-  res.render("urls_show", templateVars);
+  const userUrls = urlsForUser(user, urlDatabase)
+  const templateVars = {user , urlDatabase, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL }
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(404).send("the short url entered is not valid")
+  }
+  if(!user || !userUrls[req.params.shortURL]) {
+    return res.status(403).send("You're not authorised to do that man")
+  }
+  res.render('urls_show', templateVars)
 });
 
 
@@ -144,7 +151,7 @@ app.get("/login", (req, res) => {
   const user = req.session['user_id'];
   if (!user) {
     const templateVars = {user : null};
-    res.render("urls_login", templateVars);
+    return res.render("urls_login", templateVars);
   }
   return res.redirect("/urls");
 });
@@ -156,12 +163,12 @@ returns HTML with a relevant error message */
 app.get("/u/:shortURL", (req, res) => {
 
   if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send('not a valid Tiny Link');
+    return res.status(404).send('not a valid Tiny Link');
   }
 
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
-  res.redirect(longURL);
+  return res.redirect(longURL);
 });
 
 
@@ -183,9 +190,9 @@ app.post("/u/:shortURL", (req, res) => {
       longURL: req.body.newURL,
       userID: user
     };
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
-  res.statusCode(403).send("have to be loged in to preform that activity");
+  return res.status(403).send("have to be loged in to preform that activity");
 });
 
 
@@ -195,7 +202,7 @@ redirects to /urls
  */
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 /**
@@ -213,9 +220,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   if (user) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL];
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
-  res.statusCode(403).send("have to be logged in for that");
+  return res.status(403).send("have to be logged in for that");
 });
 
 
@@ -236,12 +243,11 @@ app.post("/login", (req, res) => {
   }
 // confirms user and email exist
   const user = verifyUserEmail(req.body.email, users);
-// uses users hashed password to compare agained 
+// uses users hashed password to compare against
 //the posted password if they are the the same and returns true or false
   if (verifyPassword(req.body.password, user)) {
-    console.log(verifyPassword(req.body.password, user))
     req.session["user_id"] = user.id;
-    res.redirect("urls");
+    return res.redirect("urls");
   }
   return res.status(403).send('Email or password is incorrect');
 });
@@ -260,8 +266,7 @@ app.post("/urls", (req, res) => {
   const user_id = req.session['user_id'];
   const user = users[user_id];
   if (!user) {
-    res.redirect("/login");
-    return res.statusCode(403).send("please Log in my man");
+    return res.status(403).send("please Log in my man");
   }
   
   urlDatabase[id] = {
@@ -316,12 +321,12 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(req.body.password, salt)
   };
   req.session["user_id"] = id;
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 // kekW if user tries random stuff 
 app.get("/*", (req, res) => {
-  res.status(404).send('uuumm i dunno')
+  return res.status(404).send('page is not here man')
 })
 
 app.listen(PORT, () => {
