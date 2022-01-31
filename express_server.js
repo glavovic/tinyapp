@@ -161,13 +161,12 @@ redirects to the corresponding long URL
 if URL for the given ID does not exist:
 returns HTML with a relevant error message */
 app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
 
   if (!urlDatabase[req.params.shortURL]) {
     return res.status(404).send('not a valid Tiny Link');
   }
-
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
   return res.redirect(longURL);
 });
 
@@ -228,11 +227,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 /*
 *
-if email and password params match an existing user:
-sets a cookie
-redirects to /urls
-if email and password params don't match an existing user:
-returns HTML with a relevant error message
+sends post request to login
 */
 app.post("/login", (req, res) => {
   
